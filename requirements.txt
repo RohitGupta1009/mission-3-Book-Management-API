@@ -1,0 +1,144 @@
+//Requirements :
+
+// We are a company that handles book publications 
+---------------------------------------------------------------------------------------------------------------------
+/* For the Database : 
+
+ 1) object called book :
+ ISBN(International standard book number) ,title,Author[],Language ,Pub Date,Num page,Category[] 
+
+ 2) Authors
+ //Name,Id,Books[]
+
+ 3)Publications -> people who sell the books
+ //Name,Id,Books[]  */
+
+---------------------------------------------------------------------------------------------------------------------
+ 
+ /* REQUIREMENTS : (OF THE API's)
+
+ 
+
+ 1) Books 
+
+
+ // GET :
+
+
+ We need an API :
+ 1)to get all books                                    -> Done 
+ 2)to get specific books                               -> Done
+ 3) To get a list of books based on category           -> Done
+ 4)to get a list of books based on author              -> Done
+ 
+
+
+ // POST :
+
+
+ We need an API :
+ 1)to upload a new book                                -> Done
+
+
+
+ // PUT :
+
+ We need an API :
+ 1)to update basic book details like title            -> Done
+ 2)to update or add new author                        -> Done
+
+
+
+ // DELETE :
+
+ We need an API :
+ 1)to delete a book                                   -> Done
+ 2)to delete an author from a book                    -> Done
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+ 2) Author
+ 
+
+ //GET :
+
+
+ We need an API
+ 1)to get all authors                                  -> Done
+ 2)to get an specific author                           -> Done
+ 3)to get a list of authors based on a book            -> Done
+
+
+
+
+// POST :
+
+
+We need an API :
+1)to add new author                                   -> Done
+
+
+
+// PUT :
+
+We need an API :
+1) to update Author name using id                     -> Done
+
+                  
+
+// DELETE :
+
+
+We need an API :
+1)to delete an author                                 -> Done
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+
+3) Publication :
+
+
+//GET :
+
+
+ We need an API :
+ 1)to get all publications                             -> Done
+ 2)to get specific publication                         -> Done
+ 3)to get a list of publications based on a book       -> Done
+
+
+
+
+// POST :
+
+ 
+ We need an API :
+ 1)to add new publication                              -> Done
+
+
+
+
+// PUT :
+
+
+We need an API :
+1)to update publication name using id of publication   -> Done
+2)to update/add new book to a publication              -> Done
+
+
+
+
+
+// DELETE :
+
+
+ We need an API :
+ 1)to delete a book from publication                  -> Done
+ 2)to delete a publication                            -> Done
+   
