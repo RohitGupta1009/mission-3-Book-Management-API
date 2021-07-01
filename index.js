@@ -8,9 +8,10 @@ const mongoose=require("mongoose");
 const database=require("./database/index");          
 
 //Models
-const BookModels=require("./database/book");
-const AuthorModels=require("./database/author");
-const PublicationModels=require("./database/publication");
+
+const BookModel=require("./database/book");
+const AuthorModel=require("./database/author");
+const PublicationModel=require("./database/publication");
 
 //Initializing express
 const shapeAI =express();
@@ -38,9 +39,10 @@ mongoose.connect(process.env.MONGO_URL,
 */     
 
 
-shapeAI.get("/",(req,res)=>
+shapeAI.get("/",async(req,res)=>
 {
-  return  res.json({books:database.books});
+    const getAllBooks=await BookModel.find();
+  return  res.json(getAllBooks);
 });
 
 
@@ -54,10 +56,13 @@ shapeAI.get("/",(req,res)=>
 */    
 
 
-shapeAI.get("/is/:isbn",(req,res)=>
+shapeAI.get("/is/:isbn",async(req,res)=>
 {
-    const getSpecificBook=database.books.filter((book)=>book.ISBN===req.params.isbn);
-    if(getSpecificBook.length===0)
+    const getSpecificBook=await BookModel.findOne({ISBN:req.params.isbn});
+    if(!getSpecificBook)  
+    // if mongoDB didn't find any data it will return null not 0 so we can't use if(getSpecificBook.length===0)
+    //condition because we are writing findOne which means we are aiming for single object hence it won't be returned in 
+    // array hence we can only use length condition if we write find(..) here we are not writing one so it WILL return array.
     {
         return res.json({error:`No book found for ${req.params.isbn}`});
     }
@@ -76,10 +81,10 @@ shapeAI.get("/is/:isbn",(req,res)=>
 */    
 
 
- shapeAI.get("/c/:category",(req,res)=>
+ shapeAI.get("/c/:category",async(req,res)=>
  {
-    const getSpecificBooks=database.books.filter((book)=>book.category.includes(req.params.category));
-    if(getSpecificBooks.length===0)
+    const getSpecificBooks= await BookModel.find({category:req.params.category});
+    if(!getSpecificBooks)
     {
         return res.json({error:`No book found for ${req.params.category}`});
     }
@@ -97,15 +102,15 @@ shapeAI.get("/is/:isbn",(req,res)=>
 
 
 
-shapeAI.get("/by/:authers",(req,res)=>
+shapeAI.get("/by/:authors",async(req,res)=>
 {
-    const getBooksByAuther = database.books.filter((book)=>book.authors.includes(parseInt(req.params.authers)));
+    const getBooksByAuthor=await BookModel.find({authors:req.params.authors})
 
-    if(getBooksByAuther.length===0)
+    if(!getBooksByAuthor)
     {
-        return res.json({error: `No books based on the auther id :${req.params.authers} is found`});
+        return res.json({error: `No books based on the author id :${req.params.authors} is found`});
     }
-    return res.json({by_author:getBooksByAuther});
+    return res.json({by_author:getBooksByAuthor});
 });
 
 
@@ -121,9 +126,10 @@ shapeAI.get("/by/:authers",(req,res)=>
 
 
 
-shapeAI.get("/author",(req,res)=>
+shapeAI.get("/author",async(req,res)=>
 {
-    return res.json({authors:database.authors});
+    const getAllAuthors=await AuthorModel.find();
+    return res.json({authors:getAllAuthors});
 });
 
 
@@ -137,10 +143,10 @@ shapeAI.get("/author",(req,res)=>
      Method        GET
 */   
 
-shapeAI.get("/author/is/:id",(req,res)=>
+shapeAI.get("/author/is/:id",async(req,res)=>
 {
-  const getAuthorById = database.authors.filter((author)=> author.id===parseInt(req.params.id));
-  if(getAuthorById.length===0)
+  const getAuthorById = await AuthorModel.find({id:parseInt(req.params.id)})
+  if(!getAuthorById)
   {
       return res.json({error:`No such author with id : ${req.params.id} was found `});
   }
@@ -153,7 +159,7 @@ shapeAI.get("/author/is/:id",(req,res)=>
 
 
 /* 
-     Route         /author/is
+     Route         /get/author/is
      Description   to get a list of authors based on a book's isbn           
      Access        PUBLIC
      Parameters    isbn
@@ -163,9 +169,9 @@ shapeAI.get("/author/is/:id",(req,res)=>
 
 
 
-shapeAI.get("/author/is/:isbn",(req,res)=>
+shapeAI.get("/get/author/is/:isbn",async(req,res)=>
 {
-    const getSpecificAuthors= database.authors.filter((author)=> author.books.includes(req.params.isbn));
+    const getSpecificAuthors= await AuthorModel.find({books:req.params.isbn});
     if(getSpecificAuthors.length===0)
     {
         return res.json({error:`No author found on the basis of ISBN : ${req.params.isbn}`});
@@ -186,9 +192,10 @@ shapeAI.get("/author/is/:isbn",(req,res)=>
 
 
 
-shapeAI.get("/publications",(req,res)=>
+shapeAI.get("/publications",async(req,res)=>
 {
-    return res.json({publications:database.publications});
+    const allPublications= await PublicationModel.find();
+    return res.json({publications:allPublications});
 });
 
 
@@ -208,11 +215,11 @@ shapeAI.listen(3000,()=>console.log("Server running !!"));
 
 
 
-shapeAI.get("/publications/by/:id",(req,res)=>
+shapeAI.get("/publications/by/:id",async(req,res)=>
 {
-    const getPublicationById = database.publications.filter((publication)=> publication.id===parseInt(req.params.id));
+    const getPublicationById = await PublicationModel.findOne({id:parseInt(req.params.id)});
 
-    if(getPublicationById.length===0)
+    if(!getPublicationById)
     {
         return res.json({error: `No publication found at id : ${req.params.id}`});
     }
@@ -231,9 +238,9 @@ shapeAI.get("/publications/by/:id",(req,res)=>
 */   
 
 
-shapeAI.get("/publications/:book",(req,res)=>
+shapeAI.get("/publications/:book",async(req,res)=>
 {
-    const getPublicationByBook = database.publications.filter((publication)=> publication.books.includes(req.params.book));
+    const getPublicationByBook = await PublicationModel.find({books:req.params.book});
     if(getPublicationByBook.length===0)
     {
         return res.json({Error:`No such publication was found for the book having isbn: ${req.params.book}`});
@@ -245,20 +252,20 @@ shapeAI.get("/publications/:book",(req,res)=>
 
 
 /* 
-     Route         /book/new
+     Route         /post/book/new
      Description   to upload a new book     
      Access        PUBLIC
      Parameters    None
      Method        POST
 */   
 
-shapeAI.post("/book/new",(req,res)=>
+shapeAI.post("/post/book/new",async(req,res)=>
 {
     const {newBook} = req.body;                                                 // Destructuring
 
-    database.books.push(newBook);
+    const addNewBook= BookModel.create(newBook);
 
-    return res.json({books:database.books,message:"book was added!"});
+    return res.json({books:addNewBook,message:"book was added!"});
 });
 
 
@@ -275,18 +282,18 @@ shapeAI.post("/book/new",(req,res)=>
 
 
 
-shapeAI.post("/author/new",(req,res)=>
+shapeAI.post("/author/new",async(req,res)=>
 {
     const {newAuthor} = req.body;                                                 // Destructuring
 
-    database.authors.push(newAuthor);
+    const addNewAuthor= AuthorModel.create(newAuthor);
 
-    return res.json({authors:database.authors,message:"author was added!"});
+    return res.json({message:"author was added!"});
 });
 
 
 
-
+                                                         
 
 
 /* 
@@ -304,9 +311,9 @@ shapeAI.post("/publication/add/new",(req,res)=>
 {
     const {newPublication} = req.body;                                                 // Destructuring
 
-    database.publications.push(newPublication);
+    const addNewPublication=PublicationModel.create(newPublication)
 
-    return res.json({publications:database.publications,message:"publication was added!"});
+    return res.json({message:"publication was added!"});
 });
 
 
@@ -513,6 +520,7 @@ shapeAI.delete("/book/delete/:isbn",(req,res)=>
      Method        DELETE
 */     
 
+
   
 
 shapeAI.delete("/book/delete/author/:isbn/:authorId",(req,res)=>
@@ -581,6 +589,7 @@ shapeAI.delete("/book/delete/author/:isbn/:authorId",(req,res)=>
               return;
           }
       });
+    
 
 
        //update book database
@@ -652,4 +661,5 @@ shapeAI.delete("/author/delete/:id",(req,res)=>
 shapeAI.listen(4000,() => console.log("Server is running !!"));  
 
 //-> Some fault occurred that's why not 3000
-                                                                 
+                                                           
+
