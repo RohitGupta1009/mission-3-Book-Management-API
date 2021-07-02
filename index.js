@@ -32,6 +32,15 @@ mongoose.connect(process.env.MONGO_URL,
 ).then(()=>console.log("connection established !!"));
 
 
+
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+//1) GET Method:
+
+
+
 /* 
      Route         /books
      Description   get all books
@@ -61,10 +70,7 @@ shapeAI.get("/books",async(req,res)=>
 shapeAI.get("/books/by/:isbn",async(req,res)=>
 {
     const getSpecificBook=await BookModel.findOne({ISBN:req.params.isbn});
-    if(!getSpecificBook)  
-    // if mongoDB didn't find any data it will return null not 0 so we can't use if(getSpecificBook.length===0)
-    //condition because we are writing findOne which means we are aiming for single object hence it won't be returned in 
-    // array hence we can only use length condition if we write find(..) here we are not writing one so it WILL return array.
+    if(!getSpecificBook)                                                                 /* if mongoDB didn't find any data it will return null not 0 so we can't use if(getSpecificBook.length===0) condition because we are writing findOne which means we are aiming for single object hence it won't be returned in array hence we can only use length condition if we write find(..) here we are not writing one so it WILL return array.*/  
     {
         return res.json({error:`No book found for ${req.params.isbn}`});
     }
@@ -251,7 +257,12 @@ shapeAI.get("/publications/:book",async(req,res)=>
 })
 
 
+//------------------------------------------------------------------------------------------------------------------
 
+
+
+
+//2) POST Method:
 
 /* 
      Route         /books/post/book/new
@@ -263,7 +274,7 @@ shapeAI.get("/publications/:book",async(req,res)=>
 
 shapeAI.post("/books/post/book/new",async(req,res)=>
 {
-    const {newBook} = req.body;                                                 // Destructuring
+    const {newBook} = req.body;                                                                // Destructuring
 
     const addNewBook= BookModel.create(newBook);
 
@@ -286,7 +297,7 @@ shapeAI.post("/books/post/book/new",async(req,res)=>
 
 shapeAI.post("/authors/new",async(req,res)=>
 {
-    const {newAuthor} = req.body;                                                 // Destructuring
+    const {newAuthor} = req.body;                                                                  // Destructuring
 
     const addNewAuthor= AuthorModel.create(newAuthor);
 
@@ -311,7 +322,7 @@ shapeAI.post("/authors/new",async(req,res)=>
 
 shapeAI.post("/publications/add/new",(req,res)=>
 {
-    const {newPublication} = req.body;                                                 // Destructuring
+    const {newPublication} = req.body;                                                        // Destructuring
 
     const addNewPublication=PublicationModel.create(newPublication)
 
@@ -321,12 +332,16 @@ shapeAI.post("/publications/add/new",(req,res)=>
 
 
 
+//-------------------------------------------------------------------------------------------------------------------
 
+
+
+//3)PUT Method:
 
 
 
 /* 
-     Route         /books/update                               //be specific to avoid clashing
+     Route         /books/update                                                               //be specific to avoid clashing
      Description   to update basic book details like title    
      Access        PUBLIC
      Parameters    isbn
@@ -348,7 +363,7 @@ shapeAI.put("/books/update/:isbn",async(req,res)=>
         },
 
         {
-            new:true,                               // as we will get old data on postmon output so to see updated data 
+            new:true,                                                                         // as we will get old data on postmon output so to see updated data 
         });
 
         return res.json({books:updatedBook});
@@ -370,7 +385,7 @@ shapeAI.put("/books/update/:isbn",async(req,res)=>
 
 
 /* 
-     Route         /books/author/update                               //be specific to avoid clashing
+     Route         /books/author/update                                                     //be specific to avoid clashing
      Description   to update or add new author  
      Access        PUBLIC
      Parameters    isbn
@@ -390,7 +405,7 @@ shapeAI.put("/books/author/update/:isbn",async(req,res)=>
     },
 
     {
-        $addToSet:{                         // Here we are not using mongoDB $push operator but $addToSet as author id should be unique in this array to avoid repetition of authorid for arrays
+        $addToSet:{                                                                       // Here we are not using mongoDB $push operator but $addToSet as author id should be unique in this array to avoid repetition of authorid for arrays
             authors:req.body.aNewAuthor
         },
     },
@@ -412,7 +427,7 @@ shapeAI.put("/books/author/update/:isbn",async(req,res)=>
     },
 
     {
-        $addToSet:{                                                             //mongoDB push operator for arrays
+        $addToSet:{                                                                      //mongoDB push operator for arrays
             books:req.params.isbn,
         },
     },
@@ -436,7 +451,7 @@ shapeAI.put("/books/author/update/:isbn",async(req,res)=>
 
 
 /* 
-     Route         /authors/name/update                               //be specific to avoid clashing
+     Route         /authors/name/update                                                       //be specific to avoid clashing
      Description   to update Author name using id     
      Access        PUBLIC
      Parameters    id
@@ -467,7 +482,7 @@ shapeAI.put("/authors/name/update/:id",async(req,res)=>
 
 
 /* 
-     Route         /publications/name/update                               //be specific to avoid clashing
+     Route         /publications/name/update                                                      //be specific to avoid clashing
      Description   to update publication name using id of publication     
      Access        PUBLIC
      Parameters    id
@@ -550,6 +565,12 @@ shapeAI.put("/publications/add/book/:isbn",async(req,res)=>
 
 
 
+//-------------------------------------------------------------------------------------------------------------------
+
+
+
+//4) Delete Method:
+
 
 
 
@@ -558,7 +579,7 @@ shapeAI.put("/publications/add/book/:isbn",async(req,res)=>
      Description   to delete a book   
      Access        PUBLIC
      Parameters    isbn
-     Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
+     Method        DELETE                                                                // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
 
@@ -608,7 +629,7 @@ shapeAI.delete("/books/delete/author/:isbn/:authorId",async(req,res)=>
         },
 
         {
-            new:true                         //as technically we are updating 
+            new:true                                                                     //as technically we are updating 
         },
         
     );
@@ -708,7 +729,7 @@ shapeAI.delete("/books/delete/author/:isbn/:authorId",async(req,res)=>
      Description   to delete a publication   
      Access        PUBLIC
      Parameters    id
-     Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
+     Method        DELETE                                                                   // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
 shapeAI.delete("/publications/delete/:id",async(req,res)=>
@@ -725,16 +746,12 @@ shapeAI.delete("/publications/delete/:id",async(req,res)=>
 
 
 
-
-
-
-
   /* 
      Route         /authors/deletion
      Description   to delete an author 
      Access        PUBLIC
      Parameters    id
-     Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
+     Method        DELETE                                                                // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
 shapeAI.delete("/authors/deletion/:id",async(req,res)=>
@@ -749,9 +766,7 @@ shapeAI.delete("/authors/deletion/:id",async(req,res)=>
 });
    
 
+//---------------------------------------------------------------------------------------------------------------------
 
 
-
-shapeAI.listen(4000,() => console.log("Server is running !!"));  
-
-//-> Some fault occurred that's why not 3000
+shapeAI.listen(4000,() => console.log("Server is running !!"));                         //-> Some fault occurred that's why not 3000
