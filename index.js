@@ -9,6 +9,7 @@ const database=require("./database/index");
 
 //Models
 
+
 const BookModel=require("./database/book");
 const AuthorModel=require("./database/author");
 const PublicationModel=require("./database/publication");
@@ -32,7 +33,7 @@ mongoose.connect(process.env.MONGO_URL,
 
 
 /* 
-     Route         /
+     Route         /books
      Description   get all books
      Access        PUBLIC
      Parameters    NONE
@@ -40,7 +41,7 @@ mongoose.connect(process.env.MONGO_URL,
 */     
 
 
-shapeAI.get("/",async(req,res)=>
+shapeAI.get("/books",async(req,res)=>
 {
     const getAllBooks=await BookModel.find();
   return  res.json(getAllBooks);
@@ -49,7 +50,7 @@ shapeAI.get("/",async(req,res)=>
 
 
 /* 
-     Route         /is
+     Route         /books/by
      Description   get specific book based on ISBN
      Access        PUBLIC
      Parameters    isbn
@@ -57,7 +58,7 @@ shapeAI.get("/",async(req,res)=>
 */    
 
 
-shapeAI.get("/is/:isbn",async(req,res)=>
+shapeAI.get("/books/by/:isbn",async(req,res)=>
 {
     const getSpecificBook=await BookModel.findOne({ISBN:req.params.isbn});
     if(!getSpecificBook)  
@@ -74,7 +75,7 @@ shapeAI.get("/is/:isbn",async(req,res)=>
 
 
 /* 
-     Route         /c     (i.e  category)
+     Route         /books/c     (i.e  category)
      Description   To get a list of books based on category 
      Access        PUBLIC
      Parameters    category
@@ -82,10 +83,10 @@ shapeAI.get("/is/:isbn",async(req,res)=>
 */    
 
 
- shapeAI.get("/c/:category",async(req,res)=>
+ shapeAI.get("/books/c/:category",async(req,res)=>
  {
     const getSpecificBooks= await BookModel.find({category:req.params.category});
-    if(!getSpecificBooks)
+    if(getSpecificBooks.length===0)
     {
         return res.json({error:`No book found for ${req.params.category}`});
     }
@@ -94,7 +95,7 @@ shapeAI.get("/is/:isbn",async(req,res)=>
 
 
  /* 
-     Route         /by
+     Route         /books/by/the
      Description   to get a list of books based on author
      Access        PUBLIC
      Parameters    authers
@@ -103,11 +104,11 @@ shapeAI.get("/is/:isbn",async(req,res)=>
 
 
 
-shapeAI.get("/by/:authors",async(req,res)=>
+shapeAI.get("/books/by/the/:authors",async(req,res)=>
 {
     const getBooksByAuthor=await BookModel.find({authors:req.params.authors})
 
-    if(!getBooksByAuthor)
+    if(getBooksByAuthor.length===0)
     {
         return res.json({error: `No books based on the author id :${req.params.authors} is found`});
     }
@@ -118,7 +119,7 @@ shapeAI.get("/by/:authors",async(req,res)=>
 
 
 /* 
-     Route         /author
+     Route         /authors
      Description   to get all authors 
      Access        PUBLIC
      Parameters    None
@@ -127,7 +128,7 @@ shapeAI.get("/by/:authors",async(req,res)=>
 
 
 
-shapeAI.get("/author",async(req,res)=>
+shapeAI.get("/authors",async(req,res)=>
 {
     const getAllAuthors=await AuthorModel.find();
     return res.json({authors:getAllAuthors});
@@ -137,14 +138,14 @@ shapeAI.get("/author",async(req,res)=>
 
 
 /* 
-     Route         /author/is
+     Route         /authors/specific
      Description   to get an specific author 
      Access        PUBLIC
      Parameters    id
      Method        GET
 */   
 
-shapeAI.get("/author/is/:id",async(req,res)=>
+shapeAI.get("/author/specific/:id",async(req,res)=>
 {
   const getAuthorById = await AuthorModel.find({id:parseInt(req.params.id)})
   if(!getAuthorById)
@@ -160,7 +161,7 @@ shapeAI.get("/author/is/:id",async(req,res)=>
 
 
 /* 
-     Route         /get/author/is
+     Route         /authors/get/by
      Description   to get a list of authors based on a book's isbn           
      Access        PUBLIC
      Parameters    isbn
@@ -170,7 +171,7 @@ shapeAI.get("/author/is/:id",async(req,res)=>
 
 
 
-shapeAI.get("/get/author/is/:isbn",async(req,res)=>
+shapeAI.get("/authors/get/by/:isbn",async(req,res)=>
 {
     const getSpecificAuthors= await AuthorModel.find({books:req.params.isbn});
     if(getSpecificAuthors.length===0)
@@ -253,14 +254,14 @@ shapeAI.get("/publications/:book",async(req,res)=>
 
 
 /* 
-     Route         /post/book/new
+     Route         /books/post/book/new
      Description   to upload a new book     
      Access        PUBLIC
      Parameters    None
      Method        POST
 */   
 
-shapeAI.post("/post/book/new",async(req,res)=>
+shapeAI.post("/books/post/book/new",async(req,res)=>
 {
     const {newBook} = req.body;                                                 // Destructuring
 
@@ -273,7 +274,7 @@ shapeAI.post("/post/book/new",async(req,res)=>
 
 
 /* 
-     Route         /author/new
+     Route         /authors/new
      Description   to add new author       
      Access        PUBLIC
      Parameters    None
@@ -283,7 +284,7 @@ shapeAI.post("/post/book/new",async(req,res)=>
 
 
 
-shapeAI.post("/author/new",async(req,res)=>
+shapeAI.post("/authors/new",async(req,res)=>
 {
     const {newAuthor} = req.body;                                                 // Destructuring
 
@@ -298,7 +299,7 @@ shapeAI.post("/author/new",async(req,res)=>
 
 
 /* 
-     Route         /publication/add/new
+     Route         /publications/add/new
      Description   to add new publication      
      Access        PUBLIC
      Parameters    None
@@ -308,7 +309,7 @@ shapeAI.post("/author/new",async(req,res)=>
 
 
 
-shapeAI.post("/publication/add/new",(req,res)=>
+shapeAI.post("/publications/add/new",(req,res)=>
 {
     const {newPublication} = req.body;                                                 // Destructuring
 
@@ -325,7 +326,7 @@ shapeAI.post("/publication/add/new",(req,res)=>
 
 
 /* 
-     Route         /book/update                               //be specific to avoid clashing
+     Route         /books/update                               //be specific to avoid clashing
      Description   to update basic book details like title    
      Access        PUBLIC
      Parameters    isbn
@@ -335,7 +336,7 @@ shapeAI.post("/publication/add/new",(req,res)=>
 
 
 
-shapeAI.put("/book/update/:isbn",async(req,res)=>
+shapeAI.put("/books/update/:isbn",async(req,res)=>
 {
 
     const updatedBook=await BookModel.findOneAndUpdate(
@@ -369,7 +370,7 @@ shapeAI.put("/book/update/:isbn",async(req,res)=>
 
 
 /* 
-     Route         /book/author/update                               //be specific to avoid clashing
+     Route         /books/author/update                               //be specific to avoid clashing
      Description   to update or add new author  
      Access        PUBLIC
      Parameters    isbn
@@ -379,7 +380,7 @@ shapeAI.put("/book/update/:isbn",async(req,res)=>
 
 
 
-shapeAI.put("/book/author/update/:isbn",async(req,res)=>
+shapeAI.put("/books/author/update/:isbn",async(req,res)=>
 {
    //update the book database 
 
@@ -435,14 +436,14 @@ shapeAI.put("/book/author/update/:isbn",async(req,res)=>
 
 
 /* 
-     Route         /author/name/update                               //be specific to avoid clashing
+     Route         /authors/name/update                               //be specific to avoid clashing
      Description   to update Author name using id     
      Access        PUBLIC
      Parameters    id
      Method        PUT
 */ 
 
-shapeAI.put("/author/name/update/:id",async(req,res)=>
+shapeAI.put("/authors/name/update/:id",async(req,res)=>
 {
     const updatedAuthorName = await AuthorModel.findOneAndUpdate(
         {
@@ -466,14 +467,14 @@ shapeAI.put("/author/name/update/:id",async(req,res)=>
 
 
 /* 
-     Route         /publication/name/update                               //be specific to avoid clashing
+     Route         /publications/name/update                               //be specific to avoid clashing
      Description   to update publication name using id of publication     
      Access        PUBLIC
      Parameters    id
      Method        PUT
 */ 
 
-shapeAI.put("/publication/name/update/:id",async(req,res)=>
+shapeAI.put("/publications/name/update/:id",async(req,res)=>
 {
     const updatedPublicationName = await PublicationModel.findOneAndUpdate(
         {
@@ -498,7 +499,7 @@ shapeAI.put("/publication/name/update/:id",async(req,res)=>
 
 
 /* 
-     Route         /publication/update/book
+     Route         /publications/add/book
      Description   to update/add new book to a publication   
      Access        PUBLIC
      Parameters    isbn
@@ -506,7 +507,7 @@ shapeAI.put("/publication/name/update/:id",async(req,res)=>
 */     
 
 
-shapeAI.put("/publication/update/book/:isbn",async(req,res)=>
+shapeAI.put("/publications/add/book/:isbn",async(req,res)=>
 {
     //update the publication database
       const updatedPublicationData =await PublicationModel.findOneAndUpdate(
@@ -553,7 +554,7 @@ shapeAI.put("/publication/update/book/:isbn",async(req,res)=>
 
 
 /* 
-     Route         /book/delete
+     Route         /books/delete
      Description   to delete a book   
      Access        PUBLIC
      Parameters    isbn
@@ -563,7 +564,7 @@ shapeAI.put("/publication/update/book/:isbn",async(req,res)=>
 
 
 
-shapeAI.delete("/book/delete/:isbn",async(req,res)=>
+shapeAI.delete("/books/delete/:isbn",async(req,res)=>
 {
      const updatedBookDataBase = await BookModel.findOneAndDelete(
          {
@@ -579,7 +580,7 @@ shapeAI.delete("/book/delete/:isbn",async(req,res)=>
 
 
 /* 
-     Route         /book/delete/author
+     Route         /books/delete/author
      Description   to delete an author from a book 
      Access        PUBLIC
      Parameters    isbn,authorId
@@ -589,7 +590,7 @@ shapeAI.delete("/book/delete/:isbn",async(req,res)=>
 
   
 
-shapeAI.delete("/book/delete/author/:isbn/:authorId",async(req,res)=>
+shapeAI.delete("/books/delete/author/:isbn/:authorId",async(req,res)=>
 {
     //update the book database
 
@@ -643,7 +644,7 @@ shapeAI.delete("/book/delete/author/:isbn/:authorId",async(req,res)=>
 
 
 /* 
-     Route         /publication/delete/book
+     Route         /publications/delete/book
      Description   to delete a book from publication 
      Access        PUBLIC
      Parameters    isbn,pubId
@@ -653,7 +654,7 @@ shapeAI.delete("/book/delete/author/:isbn/:authorId",async(req,res)=>
 
 
 
-  shapeAI.delete("/publication/delete/book/:isbn/:pubId",async(req,res)=>
+  shapeAI.delete("/publications/delete/book/:isbn/:pubId",async(req,res)=>
   {
       //update publication database
 
@@ -703,14 +704,14 @@ shapeAI.delete("/book/delete/author/:isbn/:authorId",async(req,res)=>
 
 
   /* 
-     Route         /publication/delete
+     Route         /publications/delete
      Description   to delete a publication   
      Access        PUBLIC
      Parameters    id
      Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
-shapeAI.delete("/publication/delete/:id",async(req,res)=>
+shapeAI.delete("/publications/delete/:id",async(req,res)=>
 { 
      const updatedPublicationDataBase = await PublicationModel.findOneAndDelete(
          {
@@ -729,14 +730,14 @@ shapeAI.delete("/publication/delete/:id",async(req,res)=>
 
 
   /* 
-     Route         /author/delete
+     Route         /authors/deletion
      Description   to delete an author 
      Access        PUBLIC
      Parameters    id
      Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
-shapeAI.delete("/author/delete/:id",async(req,res)=>
+shapeAI.delete("/authors/deletion/:id",async(req,res)=>
 { 
     const updatedAuthorDatabase= await AuthorModel.findOneAndDelete(
         {
