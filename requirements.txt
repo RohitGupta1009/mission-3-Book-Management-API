@@ -44,16 +44,16 @@
  // PUT :
 
  We need an API :
- 1)to update basic book details like title            -> Done
- 2)to update or add new author                        -> Done                         
+ 1)to update basic book details like title            -> Done                            ->Done
+ 2)to update or add new author                        -> Done                            ->Done
 
 
 
  // DELETE :
 
  We need an API :
- 1)to delete a book                                   -> Done
- 2)to delete an author from a book                    -> Done
+ 1)to delete a book                                   -> Done                            ->Done
+ 2)to delete an author from a book                    -> Done                            ->Done
 
 
 ----------------------------------------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ We need an API :
 // PUT :
 
 We need an API :
-1) to update Author name using id                     -> Done
+1) to update Author name using id                     -> Done                             ->Done
 
                   
 
@@ -92,7 +92,7 @@ We need an API :
 
 
 We need an API :
-1)to delete an author                                 -> Done
+1)to delete an author                                 -> Done                             ->Done
 
 
 
@@ -128,8 +128,8 @@ We need an API :
 
 
 We need an API :
-1)to update publication name using id of publication   -> Done
-2)to update/add new book to a publication              -> Done
+1)to update publication name using id of publication   -> Done                             ->Done
+2)to update/add new book to a publication              -> Done                             ->Done
 
 
 
@@ -139,6 +139,6 @@ We need an API :
 
 
  We need an API :
- 1)to delete a book from publication                  -> Done
- 2)to delete a publication                            -> Done
+ 1)to delete a book from publication                  -> Done                              ->Done 
+ 2)to delete a publication                            -> Done                              ->Done
    

@@ -12,6 +12,7 @@ const database=require("./database/index");
 const BookModel=require("./database/book");
 const AuthorModel=require("./database/author");
 const PublicationModel=require("./database/publication");
+const { findOneAndUpdate, findOneAndDelete } = require("./database/book");
 
 //Initializing express
 const shapeAI =express();
@@ -265,7 +266,7 @@ shapeAI.post("/post/book/new",async(req,res)=>
 
     const addNewBook= BookModel.create(newBook);
 
-    return res.json({books:addNewBook,message:"book was added!"});
+    return res.json({message:"book was added!"});
 });
 
 
@@ -334,19 +335,34 @@ shapeAI.post("/publication/add/new",(req,res)=>
 
 
 
-shapeAI.put("/book/update/:isbn",(req,res)=>
+shapeAI.put("/book/update/:isbn",async(req,res)=>
 {
-    database.books.forEach((book)=>
+
+    const updatedBook=await BookModel.findOneAndUpdate(
+        {
+            ISBN:req.params.isbn,
+        },
+        {
+            title:req.body.bookTitle,
+        },
+
+        {
+            new:true,                               // as we will get old data on postmon output so to see updated data 
+        });
+
+        return res.json({books:updatedBook});
+});
+    
+
+    /*database.books.forEach((book)=>
     {
         if(book.ISBN===req.params.isbn)
         {
             book.title=req.body.bookTitle;
             return;
         }
-    });
-    return res.json({books:database.books});
-});
-
+    }); */
+ 
 
 
 
@@ -363,31 +379,52 @@ shapeAI.put("/book/update/:isbn",(req,res)=>
 
 
 
-shapeAI.put("/book/author/update/:isbn",(req,res)=>
+shapeAI.put("/book/author/update/:isbn",async(req,res)=>
 {
    //update the book database 
 
-   database.books.forEach((book)=>
-   {
-       if(book.ISBN===req.params.isbn)
-       {
-          return  book.authors.push(req.body.newAuthor);
-       }
-   });
-   
- 
+  const updatedBookAuthorData=await BookModel.findOneAndUpdate(
+    {
+        ISBN:req.params.isbn,
+    },
+
+    {
+        $addToSet:{                         // Here we are not using mongoDB $push operator but $addToSet as author id should be unique in this array to avoid repetition of authorid for arrays
+            authors:req.body.aNewAuthor
+        },
+    },
+    
+    {
+        new:true,
+    }
+  );
+
+
+
 
    //update the author database as well
+   
 
-  database.authors.forEach((author)=>
-  {
-     if(author.id===req.body.newAuthor)
-     {
-         return author.books.push(req.params.isbn);
-     }
-  });
+   const updatedAuthorBookData=await AuthorModel.findOneAndUpdate(
+    {
+        id:req.body.aNewAuthor,
+    },
+
+    {
+        $addToSet:{                                                             //mongoDB push operator for arrays
+            books:req.params.isbn,
+        },
+    },
+    
+
+    {
+        new:true,
+    },
+  );
+   
+  
       
-   return res.json({books:database.books,authors:database.authors,message:"New author was added"});
+   return res.json({books:updatedBookAuthorData,authors:updatedAuthorBookData,message:"New author was added"});
   
 
 });
@@ -405,17 +442,20 @@ shapeAI.put("/book/author/update/:isbn",(req,res)=>
      Method        PUT
 */ 
 
-shapeAI.put("/author/name/update/:id",(req,res)=>
+shapeAI.put("/author/name/update/:id",async(req,res)=>
 {
-    database.authors.forEach((author)=>
-    {
-       if(author.id===parseInt(req.params.id))
-       {
-           return author.name=req.body.newName;
-       }
-    });
-
-     return res.json({author:database.authors,message:"Name of the author was successfully updated"});
+    const updatedAuthorName = await AuthorModel.findOneAndUpdate(
+        {
+          id:req.params.id,
+        },
+        {
+            name:req.body.newNameOfAuthor,
+        },
+        {
+            new:true,
+        },
+    );
+     return res.json({author:updatedAuthorName,message:"Name of the author was successfully updated"});
   
 });
  
@@ -433,19 +473,22 @@ shapeAI.put("/author/name/update/:id",(req,res)=>
      Method        PUT
 */ 
 
-shapeAI.put("/publication/name/update/:id",(req,res)=>
+shapeAI.put("/publication/name/update/:id",async(req,res)=>
 {
-    database.publications.forEach((publication)=>
-    {
-       if(publication.id===parseInt(req.params.id))
-       {
-           return publication.name=req.body.newName;
-       }
+    const updatedPublicationName = await PublicationModel.findOneAndUpdate(
+        {
+          id:req.params.id,
+        },
+        {
+            name:req.body.newNameOfPublication,
+        },
+        {
+            new:true,
+        },
+    )
+     return res.json({publication:updatedPublicationName,message:"Name of the publication was successfully updated"});
     });
 
-     return res.json({publication:database.publications,message:"Name of the publication was successfully updated"});
-  
-});
  
 
 
@@ -463,30 +506,45 @@ shapeAI.put("/publication/name/update/:id",(req,res)=>
 */     
 
 
-shapeAI.put("/publication/update/book/:isbn",(req,res)=>
+shapeAI.put("/publication/update/book/:isbn",async(req,res)=>
 {
     //update the publication database
-
-    database.publications.forEach((publication)=>{
-        if(publication.id===req.body.pubId)
-        {
-           return publication.books.push(req.params.isbn)
-        }
-    });
+      const updatedPublicationData =await PublicationModel.findOneAndUpdate(
+          { 
+              id:req.body.id,
+          },
+          {
+              $addToSet:
+              {
+                  books:req.params.isbn,
+              }
+          },
+          {
+              new:true,
+          }
+      );
+    
+    
 
 
     //update the book database
 
-    database.books.forEach((book)=>
-    {
-        if(book.ISBN===req.params.isbn)
-        {
-            return book.publication=req.body.pubId;
-             
-        }
-    });
+   const updatedBookPublicationData = await BookModel.findOneAndUpdate(
+       {
+           ISBN:req.params.isbn,
+       },
 
-    return res.json({books:database.books,publications:database.publications,message:"Successfully updated publication"});
+       {
+           publication:req.body.id,
+       },
+
+       {
+           new:true,
+       },
+   );
+
+
+    return res.json({books:updatedBookPublicationData,publications:updatedPublicationData,message:"Successfully updated publication"});
 });
 
 
@@ -502,11 +560,19 @@ shapeAI.put("/publication/update/book/:isbn",(req,res)=>
      Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
-shapeAI.delete("/book/delete/:isbn",(req,res)=>
+
+
+
+shapeAI.delete("/book/delete/:isbn",async(req,res)=>
 {
-     const updatedBookDataBase = database.books.filter((book)=> book.ISBN !==req.params.isbn);
-     database.books=updatedBookDataBase;
-     return res.json({books:database.books});
+     const updatedBookDataBase = await BookModel.findOneAndDelete(
+         {
+           ISBN:req.params.isbn,    
+         },
+         
+     );
+     
+     return res.json({books:updatedBookDataBase});
 });
 
 
@@ -523,38 +589,50 @@ shapeAI.delete("/book/delete/:isbn",(req,res)=>
 
   
 
-shapeAI.delete("/book/delete/author/:isbn/:authorId",(req,res)=>
+shapeAI.delete("/book/delete/author/:isbn/:authorId",async(req,res)=>
 {
     //update the book database
 
 
-   database.books.forEach((book)=>                      // using forEach as we are modifying one property not whole obj.
-   {
-     if(book.ISBN===req.params.isbn)
-     {
-         const newAuthorList= book.authors.filter((author)=> author!==parseInt(req.params.authorId));
-         book.authors=newAuthorList;
-         return ;
-     }
-   });
-    
+    const updatedBookData=await BookModel.findOneAndUpdate(
+        {
+            ISBN:req.params.isbn,
+        },
 
+        {
+             $pull:
+             {
+                 authors:parseInt(req.params.authorId),
+             },
+        },
+
+        {
+            new:true                         //as technically we are updating 
+        },
+        
+    );
+
+  
 
    //update the author database
 
 
-     database.authors.forEach((author)=>
-     {
-         if(author.id===parseInt(req.params.authorId))
-         {
-             const newBooksList=author.books.filter((book)=>book !== req.params.isbn);
-             author.books=newBooksList;
-             return ;
-         }
-     });
-    
+    const updatedAuthorData=await AuthorModel.findOneAndUpdate(
+        {
+           id:parseInt(req.params.authorId),
+        },
+        {
+            $pull:
+            {
+                books:req.params.isbn,
+            },   
+        },
+        {
+            new:true,
+        }
+    );
          
-       return res.json({message:"Ahh you hate him;Author was deleted",books:database.books,authors:database.authors})
+       return res.json({message:"Ahh you hate him;Author was deleted",books:updatedBookData,authors:updatedAuthorData})
 
 });
 
@@ -575,38 +653,46 @@ shapeAI.delete("/book/delete/author/:isbn/:authorId",(req,res)=>
 
 
 
-  shapeAI.delete("/publication/delete/book/:isbn/:pubId",(req,res)=>
+  shapeAI.delete("/publication/delete/book/:isbn/:pubId",async(req,res)=>
   {
       //update publication database
 
 
-      database.publications.forEach((publication)=>
-      {
-          if(publication.id===parseInt(req.params.pubId))
+      const newPublicationData= await PublicationModel.findOneAndUpdate(
           {
-              const newBooksInPublication = publication.books.filter((book)=>book!==req.params.isbn);
-              publication.books=newBooksInPublication;
-              return;
-          }
-      });
+              id:req.params.pubId,
+          },
+          {
+              $pull:
+              {
+                 books:req.params.isbn,
+              }
+          },
+          {
+               new:true,
+          },
+
+      );
     
 
 
        //update book database
 
 
-       database.books.forEach((book)=>
-       {
-             if(book.ISBN===req.params.isbn)
-             {
-                 book.publication=0;                     // assume 0 as no publication available
-                 return;
-             }
-       });
-
+       const newBookData=await BookModel.findOneAndUpdate(
+           {
+               publication:req.params.pubId,
+           },
+           {
+               publication:0,
+           },
+           {
+               new:true,
+           },
+       );
           
 
-       return res.json({books:database.books,publication:database.publications});
+       return res.json({books:newBookData,publication:newPublicationData});
 
   });
 
@@ -624,13 +710,17 @@ shapeAI.delete("/book/delete/author/:isbn/:authorId",(req,res)=>
      Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
-shapeAI.delete("/publication/delete/:id",(req,res)=>
+shapeAI.delete("/publication/delete/:id",async(req,res)=>
 { 
-     const updatedPublicationDataBase = database.publications.filter
-     ((publication)=> publication.id !==parseInt(req.params.id));
-     database.publications=updatedPublicationDataBase;
-     return res.json({publications:database.publications});
+     const updatedPublicationDataBase = await PublicationModel.findOneAndDelete(
+         {
+             id:req.params.id,
+         },
+     );
+     
+     return res.json({message:"publication was deleted"});
 });
+
 
 
 
@@ -646,12 +736,15 @@ shapeAI.delete("/publication/delete/:id",(req,res)=>
      Method        DELETE          // use filter(map method not forEach) in delete method as we want a new array in delete 
 */     
 
-shapeAI.delete("/author/delete/:id",(req,res)=>
+shapeAI.delete("/author/delete/:id",async(req,res)=>
 { 
-     const updatedAuthorDataBase = database.authors.filter
-     ((author)=> author.id !==parseInt(req.params.id));
-     database.authors=updatedAuthorDataBase;
-     return res.json({authors:database.authors});
+    const updatedAuthorDatabase= await AuthorModel.findOneAndDelete(
+        {
+          id:req.params.id,    
+        },
+        
+    );
+     return res.json({authors:updatedAuthorDatabase});
 });
    
 
