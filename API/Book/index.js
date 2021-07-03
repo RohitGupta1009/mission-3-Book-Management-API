@@ -107,11 +107,18 @@ Router.get("/by/the/:authors",async(req,res)=>
 
 Router.post("/post/book/new",async(req,res)=>
 {
-    const {newBook} = req.body;                                                                // Destructuring
+    try
+    {
+        const {newBook} = req.body;                                                                // Destructuring
 
-    const addNewBook= BookModel.create(newBook);
-
-    return res.json({message:"book was added!"});
+        const addNewBook= await BookModel.create(newBook);
+    
+        return res.json({message:"book was added!"});
+    } 
+    catch (error) 
+    {
+      return res.json({error:error.message});
+    }    
 });
 
 
