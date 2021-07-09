@@ -8,15 +8,46 @@ const BookSchema=mongoose.Schema({
     {
         type:String,
         required:true,
-        minLength:8,
-        maxLength:10,
+        minlength:8,
+        maxlength:10,
     },
-    title:String,
-    authors:[Number],  
-    language:String,
-    pubDate:String,
-    numOfPage:Number,
-    category:[String],
+    title:
+    {
+        type:String,
+        required:true,
+        minlength:2,
+        maxlength:7,
+        
+    },
+    
+
+    authors:
+    {
+        type: [Number], 
+        required:true,
+    },
+    language:
+    {
+       type: String,
+       required:true,
+       minlength:1,
+    },
+    pubDate:
+    {
+        type:String,
+        required:true,
+        
+    },
+    numOfPage:
+    {
+        type:Number,
+        required:true,
+    },
+    category:
+    {
+        type:[String],
+        required:true,
+    },
     publication:Number
 
 });

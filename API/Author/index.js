@@ -98,11 +98,20 @@ Router.get("/get/by/:isbn",async(req,res)=>
 
 Router.post("/new",async(req,res)=>
 {
+    try
+    {
+
+    
     const {newAuthor} = req.body;                                                                  // Destructuring
 
-    const addNewAuthor= AuthorModel.create(newAuthor);
+    const addNewAuthor= await AuthorModel.create(newAuthor);
 
     return res.json({message:"author was added!"});
+    }
+    catch (error)
+    {
+        return res.json({error:error.message});
+    }
 });
 
 
@@ -126,6 +135,7 @@ Router.post("/new",async(req,res)=>
 
 Router.put("/name/update/:id",async(req,res)=>
 {
+    try{
     const updatedAuthorName = await AuthorModel.findOneAndUpdate(
         {
           id:req.params.id,
@@ -135,10 +145,16 @@ Router.put("/name/update/:id",async(req,res)=>
         },
         {
             new:true,
+            runValidators:true,
         },
     );
      return res.json({author:updatedAuthorName,message:"Name of the author was successfully updated"});
-  
+    }
+    
+     catch (error)
+     {
+         return res.json({error:error.message});
+     }
 });
  
 
@@ -158,6 +174,7 @@ Router.put("/name/update/:id",async(req,res)=>
 
 Router.delete("/deletion/:id",async(req,res)=>
 { 
+     
     const updatedAuthorDatabase= await AuthorModel.findOneAndDelete(
         {
           id:req.params.id,    
@@ -165,6 +182,7 @@ Router.delete("/deletion/:id",async(req,res)=>
         
     );
      return res.json({authors:updatedAuthorDatabase});
+    
 });
 
 

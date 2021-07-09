@@ -4,8 +4,20 @@ const mongoose=require("mongoose");
 //Creating an author schema
 const AuthorSchema=mongoose.Schema({
  
-    id:Number,
-    name:String,
+    id:
+    {
+        type:Number,
+        required:true,
+        minlength:1,
+    } ,
+
+    name:
+    {
+        type:String,
+        required:true,
+        minlength:1,
+    },
+
     books:[String]
 });
 

@@ -9,7 +9,7 @@ const Router=require("express").Router();       //initialzing Express Router
 //DataBase Models:
 
 const BookModel=require("../../database/book") ; // ../ -> goes back to API folder again ../ goes back to day 25 folder 
-
+const AuthorModel=require("../../database/author");
 
 
 /* 
@@ -140,9 +140,12 @@ Router.post("/post/book/new",async(req,res)=>
 
 
 Router.put("/update/:isbn",async(req,res)=>
-{
+{   
 
-    const updatedBook=await BookModel.findOneAndUpdate(
+
+    try
+    {
+      const updatedBook=await BookModel.findOneAndUpdate(
         {
             ISBN:req.params.isbn,
         },
@@ -152,9 +155,17 @@ Router.put("/update/:isbn",async(req,res)=>
 
         {
             new:true,                                                                         // as we will get old data on postmon output so to see updated data 
+            runValidators:true,
         });
 
+
         return res.json({books:updatedBook});
+    }
+    catch (error) 
+    {
+      return res.json({error:error.message});
+    }    
+    
 });
     
 
@@ -185,53 +196,63 @@ Router.put("/update/:isbn",async(req,res)=>
 
 Router.put("/author/update/:isbn",async(req,res)=>
 {
+    try
+    {
    //update the book database 
+  
 
-  const updatedBookAuthorData=await BookModel.findOneAndUpdate(
-    {
+       const updatedBookAuthorData=await BookModel.findOneAndUpdate(
+         {
         ISBN:req.params.isbn,
-    },
+         },
 
-    {
-        $addToSet:{                                                                       // Here we are not using mongoDB $push operator but $addToSet as author id should be unique in this array to avoid repetition of authorid for arrays
+         {
+            $addToSet:
+              {                                                                       // Here we are not using mongoDB $push operator but $addToSet as author id should be unique in this array to avoid repetition of authorid for arrays
             authors:req.body.aNewAuthor
-        },
-    },
+              },
+         },
     
-    {
-        new:true,
-    }
-  );
+         {
+            new:true,
+            runValidators:true,
+         }
+      );
 
 
-
-
-   //update the author database as well
+         //update the author database as well
    
 
-   const updatedAuthorBookData=await AuthorModel.findOneAndUpdate(
-    {
-        id:req.body.aNewAuthor,
-    },
+           const updatedAuthorBookData=await AuthorModel.findOneAndUpdate(
+           {
+               id:req.body.aNewAuthor,
+           },
 
-    {
-        $addToSet:{                                                                      //mongoDB push operator for arrays
-            books:req.params.isbn,
-        },
-    },
+           {
+             $addToSet:
+             {                                                                      //mongoDB push operator for arrays
+                   books:req.params.isbn,
+             },
+           },
     
 
-    {
-        new:true,
-    },
-  );
+           {
+               new:true,
+           },
+        );
+    
+          return res.json({books:updatedBookAuthorData,authors:updatedAuthorBookData,message:"New author was added"});
+   }
    
-  
-      
-   return res.json({books:updatedBookAuthorData,authors:updatedAuthorBookData,message:"New author was added"});
-  
+   catch(error)
+   {
+       return res.json({error:error.message});
+   }
 
 });
+
+
+//4) DELETE 
 
 
 /* 
@@ -247,6 +268,9 @@ Router.put("/author/update/:isbn",async(req,res)=>
 
 Router.delete("/delete/:isbn",async(req,res)=>
 {
+   
+
+    
      const updatedBookDataBase = await BookModel.findOneAndDelete(
          {
            ISBN:req.params.isbn,    
@@ -255,6 +279,8 @@ Router.delete("/delete/:isbn",async(req,res)=>
      );
      
      return res.json({books:updatedBookDataBase});
+
+
 });
 
 
@@ -273,6 +299,8 @@ Router.delete("/delete/:isbn",async(req,res)=>
 
 Router.delete("/delete/author/:isbn/:authorId",async(req,res)=>
 {
+    try
+    {
     //update the book database
 
 
@@ -289,7 +317,8 @@ Router.delete("/delete/author/:isbn/:authorId",async(req,res)=>
         },
 
         {
-            new:true                                                                     //as technically we are updating 
+            new:true,                                                                     //as technically we are updating 
+            runValidators:true,
         },
         
     );
@@ -311,10 +340,17 @@ Router.delete("/delete/author/:isbn/:authorId",async(req,res)=>
         },
         {
             new:true,
+            runValidators:true,
         }
     );
          
        return res.json({message:"Ahh you hate him;Author was deleted",books:updatedBookData,authors:updatedAuthorData})
+
+   }
+   catch(error)
+   {
+       return res.json({error:error.message});
+   }
 
 });
 

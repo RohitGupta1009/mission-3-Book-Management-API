@@ -6,6 +6,7 @@ const Router=require("express").Router();
 //Database Models:
 
 const PublicationModel=require("../../database/publication");
+const BookModel=require("../../database/book")
 
 
 
@@ -105,14 +106,24 @@ Router.get("/:book",async(req,res)=>
 
 
 
-Router.post("/add/new",(req,res)=>
+Router.post("/add/new",async (req,res)=>
 {
+    try
+    {
+
+    
     const {newPublication} = req.body;                                                        // Destructuring
 
-    const addNewPublication=PublicationModel.create(newPublication)
+    const addNewPublication=await PublicationModel.create(newPublication)
 
     return res.json({message:"publication was added!"});
+    }
+    catch (error)
+    {
+        return res.json({error:error.message});
+    }
 });
+
 
 
 
@@ -135,6 +146,10 @@ Router.post("/add/new",(req,res)=>
 
 Router.put("/name/update/:id",async(req,res)=>
 {
+    try
+    {
+
+    
     const updatedPublicationName = await PublicationModel.findOneAndUpdate(
         {
           id:req.params.id,
@@ -144,9 +159,15 @@ Router.put("/name/update/:id",async(req,res)=>
         },
         {
             new:true,
+            runValidators:true,
         },
     )
      return res.json({publication:updatedPublicationName,message:"Name of the publication was successfully updated"});
+    }
+    catch (error)
+    {
+        return res.json({error:error.message});
+    }
     });
 
  
@@ -162,6 +183,10 @@ Router.put("/name/update/:id",async(req,res)=>
 
 Router.put("/add/book/:isbn",async(req,res)=>
 {
+    try
+    {
+
+    
     //update the publication database
       const updatedPublicationData =await PublicationModel.findOneAndUpdate(
           { 
@@ -175,6 +200,7 @@ Router.put("/add/book/:isbn",async(req,res)=>
           },
           {
               new:true,
+              runValidators:true,
           }
       );
     
@@ -194,11 +220,17 @@ Router.put("/add/book/:isbn",async(req,res)=>
 
        {
            new:true,
+           runValidators:true,
        },
    );
 
 
     return res.json({books:updatedBookPublicationData,publications:updatedPublicationData,message:"Successfully updated publication"});
+    }
+    catch (error)
+    {
+        return res.json({error:error.message});
+    }
 });
 
 
